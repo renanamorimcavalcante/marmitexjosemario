@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marmitas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span>🕐 Horário: 10:00 às 13:00</span>
+    <span>🚀 Entrega em até 30 minutos</span>
+    <span>📱 <a href="https://wa.me/5598970281003" target="_blank" style="color:#fff;">WhatsApp: (98) 97028-1003</a></span>
+  </div>
+  <div class="header-main">
+    <div class="logo">🍱 Mar<span>mitas</span></div>
+    <nav>
+      <button class="active" onclick="showSection('refeicoes', this)">Refeições</button>
+      <button onclick="showSection('pedidos', this)">Meus Pedidos</button>
+      <button onclick="showSection('loja-link', this)">Loja</button>
+    </nav>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="cart-btn" onclick="openCart()">
+        🛒 Carrinho <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <button class="clear-cart-btn" onclick="limparCarrinho()" title="Limpar carrinho">🗑️</button>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>Refeições fresquinhas 🍽️</h1>
+  <p>Peça agora e receba em até 30 minutos</p>
+</div>
+
+<!-- REFEIÇÕES -->
+<section class="section active" id="refeicoes">
+  <div class="section-title">Cardápio do Dia</div>
+  <div class="cards-grid">
+
+    <div class="card">
+      <img src="https://placehold.co/400x200/e85d04/fff?text=Strogonoff+de+Frango" alt="Strogonoff de Frango" />
+      <div class="card-body">
+        <h3>Strogonoff de Frango</h3>
+        <div class="price">R$ 18,00</div>
+        <div class="qty-control">
+          <button onclick="changeQty('frango', -1)">−</button>
+          <span id="qty-frango">1</span>
+          <button onclick="changeQty('frango', 1)">+</button>
+        </div>
+        <button class="add-btn" onclick="addToCart('frango', 'Strogonoff de Frango', 18.00)">Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="https://placehold.co/400x200/c44d00/fff?text=Strogonoff+de+Carne" alt="Strogonoff de Carne" />
+      <div class="card-body">
+        <h3>Strogonoff de Carne</h3>
+        <div class="price">R$ 20,00</div>
+        <div class="qty-control">
+          <button onclick="changeQty('carne', -1)">−</button>
+          <span id="qty-carne">1</span>
+          <button onclick="changeQty('carne', 1)">+</button>
+        </div>
+        <button class="add-btn" onclick="addToCart('carne', 'Strogonoff de Carne', 20.00)">Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="https://placehold.co/400x200/ff8c42/fff?text=Strogonoff+de+Camarão" alt="Strogonoff de Camarão" />
+      <div class="card-body">
+        <h3>Strogonoff de Camarão</h3>
+        <div class="price">R$ 28,00</div>
+        <div class="qty-control">
+          <button onclick="changeQty('camarao', -1)">−</button>
+          <span id="qty-camarao">1</span>
+          <button onclick="changeQty('camarao', 1)">+</button>
+        </div>
+        <button class="add-btn" onclick="addToCart('camarao', 'Strogonoff de Camarão', 28.00)">Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MEUS PEDIDOS -->
+<section class="section" id="pedidos">
+  <div class="section-title">Meus Pedidos</div>
+  <div id="pedidosList"></div>
+</section>
+
+<!-- LOJA LINK -->
+<section class="section" id="loja-link">
+  <div style="text-align:center; padding: 60px 20px;">
+    <div style="font-size:3rem; margin-bottom:16px;">🏪</div>
+    <h2 style="margin-bottom:12px;">Área do Lojista</h2>
+    <p style="color:#666; margin-bottom:28px;">Acesse o painel de gerenciamento de pedidos.</p>
+    <a href="loja.html" style="background:var(--primary);color:#fff;padding:14px 36px;border-radius:12px;text-decoration:none;font-weight:700;font-size:1rem;">Acessar Painel da Loja</a>
+  </div>
+</section>
+
+<!-- MODAL CARRINHO -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCart()">✕</button>
+    <h2>🛒 Seu Carrinho</h2>
+
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-total" id="cartTotal"></div>
+
+    <hr style="margin-bottom:20px; border-color: var(--border);" />
+
+    <div class="form-group">
+      <label>Seu nome *</label>
+      <input type="text" id="clienteNome" placeholder="Ex: João Silva" />
+    </div>
+    <div class="form-group">
+      <label>Telefone *</label>
+      <input type="tel" id="clienteTel" placeholder="(98) 99999-9999" />
+    </div>
+    <div class="form-group">
+      <label>Endereço de entrega *</label>
+      <input type="text" id="clienteEndereco" placeholder="Rua, número, bairro" />
+    </div>
+    <div class="form-group">
+      <label>Forma de pagamento *</label>
+      <select id="pagamento" onchange="togglePix()">
+        <option value="">Selecione...</option>
+        <option value="pix">Pix</option>
+        <option value="entrega">Pagar na entrega</option>
+      </select>
+      <div class="pix-info" id="pixInfo">
+        💳 Chave Pix (CPF):
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+          <strong id="pixKey">001.173.795-65</strong>
+          <button onclick="copiarPix()" id="copyBtn" style="background:var(--primary);color:#fff;border:none;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;">Copiar</button>
+        </div>
+        Após o pagamento, envie o comprovante pelo WhatsApp.
+      </div>
+    </div>
+
+    <button class="btn-finalizar" onclick="finalizarPedido()">✅ Finalizar Pedido</button>
+  </div>
+</div>
+
+<a class="whatsapp-float" href="https://wa.me/5598970281003" target="_blank">
+  💬 WhatsApp
+</a>
+
+<script src="app.js"></script>
+</body>
+</html>

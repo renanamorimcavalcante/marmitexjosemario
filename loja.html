@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel da Loja - Marmitas</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary) 0%, #ff8c42 100%);
+    }
+    .login-box {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .login-box .icon { font-size: 2.8rem; margin-bottom: 10px; }
+    .login-box h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+    .login-box p { color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+    .login-box input {
+      width: 100%; padding: 12px 16px; border: 1.5px solid #f0e0d0;
+      border-radius: 10px; font-size: 1rem; margin-bottom: 14px; outline: none;
+      font-family: inherit;
+    }
+    .login-box input:focus { border-color: var(--primary); }
+    .login-box button {
+      width: 100%; background: var(--primary); color: #fff; border: none;
+      padding: 13px; border-radius: 10px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .login-box button:hover { background: var(--primary-dark); }
+    .login-error { color: #c0392b; font-size: 0.88rem; margin-top: 8px; display: none; }
+
+    /* PAINEL */
+    #painel { display: none; }
+    .painel-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .painel-header h1 { font-size: 1.3rem; font-weight: 800; }
+    .painel-header button {
+      background: rgba(255,255,255,0.2); border: none; color: #fff;
+      padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 0.9rem;
+    }
+    .painel-body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    .painel-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    .loja-pedido-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 24px;
+      box-shadow: 0 4px 20px rgba(232,93,4,0.10);
+      border: 1.5px solid #f0e0d0;
+      margin-bottom: 18px;
+    }
+    .loja-pedido-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .loja-pedido-card .info { font-size: 0.9rem; color: #555; margin-bottom: 3px; }
+    .loja-pedido-card ul { margin: 10px 0; padding: 0; }
+    .loja-pedido-card ul li {
+      list-style: none;
+      font-size: 0.93rem;
+      padding: 3px 0;
+      border-bottom: 1px dashed #f0e0d0;
+    }
+    .loja-pedido-card .total {
+      font-weight: 800;
+      color: var(--primary);
+      font-size: 1.05rem;
+      margin: 10px 0 14px;
+    }
+    .action-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-aceitar {
+      background: #2d9e5f; color: #fff; border: none;
+      padding: 9px 22px; border-radius: 8px; font-weight: 700;
+      cursor: pointer; font-size: 0.9rem; transition: background 0.2s;
+    }
+    .btn-aceitar:hover { background: #1e7a48; }
+    .btn-recusar {
+      background: #e74c3c; color: #fff; border: none;
+      padding: 9px 22px; border-radius: 8px; font-weight: 700;
+      cursor: pointer; font-size: 0.9rem; transition: background 0.2s;
+    }
+    .btn-recusar:hover { background: #c0392b; }
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .filter-tabs button {
+      padding: 7px 18px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .filter-tabs button.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .refresh-btn {
+      background: none;
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      padding: 7px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-left: auto;
+      display: block;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { background: var(--primary); color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <div class="icon">🏪</div>
+    <h2>Painel da Loja</h2>
+    <p>Acesso restrito ao lojista</p>
+    <input type="password" id="senhaInput" placeholder="Digite a senha" onkeydown="if(event.key==='Enter') fazerLogin()" />
+    <button onclick="fazerLogin()">Entrar</button>
+    <div class="login-error" id="loginError">Senha incorreta. Tente novamente.</div>
+    <div style="margin-top:16px;">
+      <a href="index.html" style="color:#aaa; font-size:0.85rem; text-decoration:none;">← Voltar ao site</a>
+    </div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div id="painel">
+  <div class="painel-header">
+    <h1>🏪 Painel da Loja — Marmitas</h1>
+    <button onclick="sair()">Sair</button>
+  </div>
+  <div class="painel-body">
+    <div class="painel-title">Pedidos Recebidos</div>
+    <div class="filter-tabs">
+      <button class="active" onclick="filtrar('todos', this)">Todos</button>
+      <button onclick="filtrar('pendente', this)">Pendentes</button>
+      <button onclick="filtrar('aceito', this)">Aceitos</button>
+      <button onclick="filtrar('recusado', this)">Recusados</button>
+    </div>
+    <button class="refresh-btn" onclick="renderLojaPedidos()">🔄 Atualizar</button>
+    <div id="lojaPedidosList"></div>
+  </div>
+</div>
+
+<script src="loja.js"></script>
+</body>
+</html>

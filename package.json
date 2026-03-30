@@ -1,0 +1,14 @@
+{
+  "name": "marmitex",
+  "version": "1.0.0",
+  "description": "Sistema de pedidos Marmitex",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+
+  "dependencies": {
+    "googleapis": "^171.4.0"
+  }
+}
