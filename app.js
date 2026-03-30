@@ -1,4 +1,4 @@
-const API = 'https://marmitexjosemario.vercel.app';
+const API = '/api';
 
 // Quantidades selecionadas nos cards
 const qtys = { frango: 1, carne: 1, camarao: 1 };

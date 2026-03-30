@@ -8,18 +8,23 @@ const SPREADSHEET_ID = '1Z4ATIkmt_k-40W29-RRqYjiJZ2I0hAwOP9DQYtsk9cw';
 const SHEET_PEDIDOS  = 'Página1';
 const SHEET_STATUS   = 'Status';
 
+// Função para gerenciar a autenticação com Google Sheets
 function getAuth() {
   let credentials;
   if (process.env.GOOGLE_CREDENTIALS) {
     credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-    // Correção essencial para quebras de linha da chave privada no ambiente Vercel
+    // IMPORTANTE: Corrige as quebras de linha da private_key que o Vercel remove
     if (credentials.private_key) {
       credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
     }
   } else {
-    // Carregamento local via arquivo json
+    // Carregamento local para testes (usando o arquivo físico)
     const credPath = path.join(__dirname, 'credentials.json');
-    credentials = JSON.parse(fs.readFileSync(credPath, 'utf8'));
+    if (fs.existsSync(credPath)) {
+      credentials = JSON.parse(fs.readFileSync(credPath, 'utf8'));
+    } else {
+      throw new Error("Arquivo credentials.json não encontrado localmente.");
+    }
   }
   
   return new google.auth.GoogleAuth({
@@ -114,7 +119,7 @@ async function atualizarStatus(id, status) {
 }
 
 const server = http.createServer(async (req, res) => {
-  // CORS Headers
+  // Configuração de CORS para permitir requisições do seu próprio domínio
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -125,8 +130,8 @@ const server = http.createServer(async (req, res) => {
     return; 
   }
 
-  // Rotas de API
-  if (req.method === 'GET' && req.url === '/pedidos') {
+  // Rotas de API ajustadas para aceitar /api/rota ou apenas /rota
+  if (req.method === 'GET' && req.url.endsWith('/pedidos')) {
     try {
       const pedidos = await listarPedidos();
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -138,7 +143,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/status') {
+  if (req.method === 'POST' && req.url.endsWith('/status')) {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', async () => {
@@ -155,7 +160,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/pedido') {
+  if (req.method === 'POST' && req.url.endsWith('/pedido')) {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', async () => {
@@ -172,36 +177,17 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Fallback para arquivos estáticos (Útil para rodar localmente)
-  let urlPath = req.url === '/' ? 'index.html' : req.url;
-  let filePath = path.join(__dirname, urlPath);
-  
-  const ext = path.extname(filePath);
-  const types = { 
-    '.html': 'text/html', 
-    '.css': 'text/css', 
-    '.js': 'application/javascript',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg'
-  };
-
-  fs.readFile(filePath, (err, data) => {
-    if (err) { 
-      res.writeHead(404); 
-      res.end('Not found'); 
-      return; 
-    }
-    res.writeHead(200, { 'Content-Type': types[ext] || 'text/plain' });
-    res.end(data);
-  });
+  // Se não cair em nenhuma rota de API, retorna 404 (A Vercel serve os estáticos automaticamente)
+  res.writeHead(404);
+  res.end('Rota de API não encontrada.');
 });
 
-// Inicialização para ambiente local
+// Suporte para rodar localmente (npm start ou node index.js)
 if (process.env.NODE_ENV !== 'production') {
   server.listen(PORT, () => {
     console.log(`✅ Servidor local rodando em http://localhost:${PORT}`);
   });
 }
 
-// Exportação para a Vercel
+// Essencial para o Vercel identificar o servidor Node.js
 module.exports = server;
