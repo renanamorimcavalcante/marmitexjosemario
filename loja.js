@@ -22,7 +22,7 @@ function sair() {
 }
 
 function atualizarStatus(id, status) {
-  fetch('https://marmitex-theta.vercel.app/status', {
+  fetch('https://marmitexjosemario.vercel.app/status', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id, status })
@@ -37,7 +37,7 @@ function filtrar(tipo, btn) {
 }
 
 function renderLojaPedidos() {
-  fetch('https://marmitex-theta.vercel.app/pedidos')
+  fetch('https://marmitexjosemario.vercel.app/pedidos')
     .then(r => r.json())
     .then(pedidos => renderLista(pedidos))
     .catch(() => {

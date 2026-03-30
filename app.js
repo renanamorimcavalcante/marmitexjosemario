@@ -1,4 +1,4 @@
-const API = 'https://marmitex-theta.vercel.app';
+const API = 'https://marmitexjosemario.vercel.app';
 
 // Quantidades selecionadas nos cards
 const qtys = { frango: 1, carne: 1, camarao: 1 };
