@@ -3,15 +3,25 @@ const fs = require('fs');
 const path = require('path');
 const { google } = require('googleapis');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const SPREADSHEET_ID = '1Z4ATIkmt_k-40W29-RRqYjiJZ2I0hAwOP9DQYtsk9cw';
 const SHEET_PEDIDOS  = 'Página1';
 const SHEET_STATUS   = 'Status';
 
 function getAuth() {
-  const credentials = process.env.GOOGLE_CREDENTIALS
-    ? JSON.parse(process.env.GOOGLE_CREDENTIALS)
-    : JSON.parse(fs.readFileSync(path.join(__dirname, 'credentials.json'), 'utf8'));
+  let credentials;
+  if (process.env.GOOGLE_CREDENTIALS) {
+    credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    // Correção essencial para quebras de linha da chave privada no ambiente Vercel
+    if (credentials.private_key) {
+      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+    }
+  } else {
+    // Carregamento local via arquivo json
+    const credPath = path.join(__dirname, 'credentials.json');
+    credentials = JSON.parse(fs.readFileSync(credPath, 'utf8'));
+  }
+  
   return new google.auth.GoogleAuth({
     credentials,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -34,7 +44,10 @@ async function lerStatus() {
     const map = {};
     rows.forEach(([id, status]) => { if (id) map[id] = status; });
     return map;
-  } catch { return {}; }
+  } catch (e) { 
+    console.error("Erro ao ler status:", e.message);
+    return {}; 
+  }
 }
 
 async function listarPedidos() {
@@ -101,11 +114,18 @@ async function atualizarStatus(id, status) {
 }
 
 const server = http.createServer(async (req, res) => {
+  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+  
+  if (req.method === 'OPTIONS') { 
+    res.writeHead(204); 
+    res.end(); 
+    return; 
+  }
 
+  // Rotas de API
   if (req.method === 'GET' && req.url === '/pedidos') {
     try {
       const pedidos = await listarPedidos();
@@ -152,18 +172,36 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Arquivos estáticos
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
+  // Fallback para arquivos estáticos (Útil para rodar localmente)
+  let urlPath = req.url === '/' ? 'index.html' : req.url;
+  let filePath = path.join(__dirname, urlPath);
+  
   const ext = path.extname(filePath);
-  const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript' };
+  const types = { 
+    '.html': 'text/html', 
+    '.css': 'text/css', 
+    '.js': 'application/javascript',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg'
+  };
+
   fs.readFile(filePath, (err, data) => {
-    if (err) { res.writeHead(404); res.end('Not found'); return; }
+    if (err) { 
+      res.writeHead(404); 
+      res.end('Not found'); 
+      return; 
+    }
     res.writeHead(200, { 'Content-Type': types[ext] || 'text/plain' });
     res.end(data);
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
-  console.log(`📊 Planilha: https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}`);
-});
+// Inicialização para ambiente local
+if (process.env.NODE_ENV !== 'production') {
+  server.listen(PORT, () => {
+    console.log(`✅ Servidor local rodando em http://localhost:${PORT}`);
+  });
+}
+
+// Exportação para a Vercel
+module.exports = server;

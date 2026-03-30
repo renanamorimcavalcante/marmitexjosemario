@@ -1,17 +1,8 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "server.js", "use": "@vercel/node" },
-    { "src": "*.html", "use": "@vercel/static" },
-    { "src": "*.css", "use": "@vercel/static" },
-    { "src": "app.js", "use": "@vercel/static" },
-    { "src": "loja.js", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/pedidos", "dest": "server.js" },
-    { "src": "/pedido", "dest": "server.js" },
-    { "src": "/status", "dest": "server.js" },
-    { "src": "/", "dest": "index.html" },
-    { "src": "/(.*)", "dest": "/$1" }
+  "rewrites": [
+    { "source": "/pedido", "destination": "/server.js" },
+    { "source": "/pedidos", "destination": "/server.js" },
+    { "source": "/status", "destination": "/server.js" }
   ]
 }
